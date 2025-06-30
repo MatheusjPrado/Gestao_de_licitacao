@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalhes do Pregão</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script>
+    // Simulação de login (substituir no futuro por login real)
+    const usuarioLogado = {
+      nome: "AdminTech", // nome do fornecedor ou responsável logado
+      tipo: "fornecedor"
+    };
+
+    const pregoes = {
+      "001": {
+        descricao: "Compra de Servidores",
+        tipo: "Material",
+        area: "Informática",
+        preco: "R$ 25.000,00",
+        prazo: "15 dias",
+        requisitos: "Entrega em até 15 dias, homologação técnica obrigatória.",
+        propostas: 5,
+        menor: "R$ 4.750,00",
+        maior: "R$ 5.600,00",
+        perguntas: 2,
+        responsavel: "AdminTech"
+      },
+      "002": {
+        descricao: "Manutenção de Prédio",
+        tipo: "Serviço",
+        area: "Construção Civil",
+        preco: "R$ 12.000,00",
+        prazo: "30 dias",
+        requisitos: "Equipe especializada, entrega de cronograma detalhado.",
+        propostas: 3,
+        menor: "R$ 10.800,00",
+        maior: "R$ 11.900,00",
+        perguntas: 1,
+        responsavel: "Construtora BR"
+      },
+      "003": {
+        descricao: "Sistema de Gestão Escolar",
+        tipo: "Software",
+        area: "Educação",
+        preco: "R$ 40.000,00",
+        prazo: "45 dias",
+        requisitos: "Interface web, relatórios e integração com bancos de dados.",
+        propostas: 4,
+        menor: "R$ 37.000,00",
+        maior: "R$ 39.500,00",
+        perguntas: 2,
+        responsavel: "SoftEdu"
+      }
+    };
+
+    const perguntasRespostas = {
+      "001": [
+        { fornecedor: "Fornecedor A", pergunta: "Qual o prazo de entrega?", resposta: null },
+        { fornecedor: "Fornecedor B", pergunta: "Pode ser entregue em lote?", resposta: "Sim, desde que respeite o prazo." }
+      ],
+      "002": [
+        { fornecedor: "Construtora BR", pergunta: "É necessário emitir ART?", resposta: null }
+      ]
+    };
+
+    function carregarDetalhes() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      const pregao = pregoes[id];
+      const container = document.getElementById("conteudoPregao");
+
+      if (pregao) {
+        container.innerHTML = `
+          <h3>${pregao.descricao} (ID: ${id})</h3>
+          <ul class="list-group mb-4">
+            <li class="list-group-item"><strong>Tipo:</strong> ${pregao.tipo}</li>
+            <li class="list-group-item"><strong>Área:</strong> ${pregao.area}</li>
+            <li class="list-group-item"><strong>Preço Máximo:</strong> ${pregao.preco}</li>
+            <li class="list-group-item"><strong>Prazo:</strong> ${pregao.prazo}</li>
+            <li class="list-group-item"><strong>Requisitos:</strong> ${pregao.requisitos}</li>
+          </ul>
+
+          <div class="card shadow mb-4">
+            <div class="card-header bg-warning text-dark">Estatísticas deste Pregão</div>
+            <div class="card-body">
+              <ul class="list-group">
+                <li class="list-group-item">Propostas recebidas: <strong>${pregao.propostas}</strong></li>
+                <li class="list-group-item">Menor valor proposto: <strong>${pregao.menor}</strong></li>
+                <li class="list-group-item">Maior valor proposto: <strong>${pregao.maior}</strong></li>
+                <li class="list-group-item">Perguntas registradas: <strong>${pregao.perguntas}</strong></li>
+              </ul>
+            </div>
+          </div>
+
+          <a href="proposta.html?id=${id}" class="btn btn-primary mb-4">Fazer Proposta</a>
+        `;
+      } else {
+        container.innerHTML = `<div class="alert alert-danger">Pregão não encontrado.</div>`;
+        document.getElementById("formPergunta").style.display = "none";
+        document.getElementById("listaPerguntas").style.display = "none";
+      }
+    }
+
+    function carregarPerguntas() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      const pregao = pregoes[id];
+      const lista = document.getElementById("listaPerguntas");
+
+      const isResponsavel = usuarioLogado.nome === pregao.responsavel;
+
+      const perguntas = perguntasRespostas[id] || [];
+
+      if (perguntas.length > 0) {
+        lista.innerHTML = perguntas.map((p, index) => `
+          <li class="list-group-item">
+            <strong>${p.fornecedor}:</strong> ${p.pergunta}<br>
+            ${p.resposta ? `
+              <strong>Resposta:</strong> ${p.resposta}
+            ` : isResponsavel ? `
+              <div class="mt-2">
+                <label class="form-label">Responder:</label>
+                <textarea class="form-control mb-2" rows="2" id="resposta-${index}"></textarea>
+                <button class="btn btn-sm btn-success" onclick="responderPergunta(${index}, '${id}')">Salvar Resposta</button>
+              </div>
+            ` : `<em>Aguardando resposta do responsável.</em>`}
+          </li>
+        `).join("");
+      } else {
+        lista.innerHTML = `<li class="list-group-item">Nenhuma pergunta registrada até o momento.</li>`;
+      }
+    }
+
+    function responderPergunta(index, id) {
+      const textarea = document.getElementById(`resposta-${index}`);
+      const resposta = textarea.value.trim();
+
+      if (resposta === "") {
+        alert("Digite uma resposta antes de salvar.");
+        return;
+      }
+
+      perguntasRespostas[id][index].resposta = resposta;
+      alert("Resposta salva com sucesso! (simulação)");
+      carregarPerguntas();
+    }
+
+    window.onload = () => {
+      carregarDetalhes();
+      carregarPerguntas();
+    };
+  </script>
+</head>
+<body class="bg-light">
+  <!-- Cabeçalho com link para voltar -->
+  <header class="bg-info text-white py-3 shadow">
+    <div class="container text-center">
+      <h1 class="mb-0">
+        <a href="index.html" class="text-white text-decoration-none">Sistema de Gestão de Licitações</a>
+      </h1>
+    </div>
+  </header>
+
+  <div class="container mt-5 pt-3">
+    <!-- Detalhes e estatísticas -->
+    <div id="conteudoPregao"></div>
+
+    <!-- Formulário de Perguntas -->
+    <div class="card shadow mb-4">
+      <div class="card-header bg-secondary text-white">Enviar Pergunta ao Responsável</div>
+      <div class="card-body">
+        <form id="formPergunta">
+          <div class="mb-3">
+            <label class="form-label">Sua Pergunta</label>
+            <textarea class="form-control" rows="3" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-outline-dark">Enviar</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Histórico de Perguntas -->
+    <div class="card shadow mb-4">
+      <div class="card-header bg-light"><strong>Histórico de Perguntas</strong></div>
+      <div class="card-body">
+        <ul id="listaPerguntas" class="list-group"></ul>
+      </div>
+    </div>
+
+    <a href="pregoes.html" class="btn btn-outline-secondary">Voltar à Lista de Pregões</a>
+  </div>
+
+  <script>
+    document.getElementById("formPergunta").addEventListener("submit", function(e) {
+      e.preventDefault();
+      alert("Pergunta enviada com sucesso! (simulação)");
+      this.reset();
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
