@@ -23,7 +23,9 @@
         maior: "R$ 5.600,00",
         perguntas: 2,
         responsavel: "AdminTech",
-        status: "aberto"
+        status: "aberto",
+        inicio: "2025-07-05 08:00",
+        fim: "2025-07-05 18:00"
       },
       "002": {
         descricao: "Manutenção de Prédio",
@@ -37,7 +39,9 @@
         maior: "R$ 11.900,00",
         perguntas: 1,
         responsavel: "Construtora BR",
-        status: "aberto"
+        status: "aberto",
+        inicio: "2025-07-06 09:00",
+        fim: "2025-07-06 17:00"
       },
       "003": {
         descricao: "Sistema de Gestão Escolar",
@@ -51,7 +55,9 @@
         maior: "R$ 39.500,00",
         perguntas: 2,
         responsavel: "SoftEdu",
-        status: "aberto"
+        status: "aberto",
+        inicio: "2025-07-07 10:00",
+        fim: "2025-07-07 16:00"
       },
       "004": {
         descricao: "Reforma da Biblioteca Central",
@@ -66,7 +72,9 @@
         perguntas: 3,
         responsavel: "ObrasLtda",
         status: "fechado",
-        vencedor: "Construtora Alpha"
+        vencedor: "Construtora Alpha",
+        inicio: "2025-07-08 08:00",
+        fim: "2025-07-08 18:00"
       },
       "005": {
         descricao: "Aquisição de Veículos Administrativos",
@@ -80,9 +88,21 @@
         maior: "-",
         perguntas: 0,
         responsavel: "TransportesBR",
-        status: "cancelado"
+        status: "cancelado",
+        inicio: "2025-07-09 09:00",
+        fim: "2025-07-09 17:00"
       }
     };
+
+    function formatarDataHora(dataHoraISO) {
+      const data = new Date(dataHoraISO);
+      const dia = String(data.getDate()).padStart(2, '0');
+      const mes = String(data.getMonth() + 1).padStart(2, '0');
+      const ano = data.getFullYear();
+      const hora = String(data.getHours()).padStart(2, '0');
+      const min = String(data.getMinutes()).padStart(2, '0');
+      return `${dia}/${mes}/${ano} às ${hora}:${min}`;
+    }
 
     function carregarDetalhes() {
       const id = new URLSearchParams(window.location.search).get("id");
@@ -105,6 +125,8 @@
           <li class="list-group-item"><strong>Área:</strong> ${pregao.area}</li>
           <li class="list-group-item"><strong>Preço Máximo:</strong> ${pregao.preco}</li>
           <li class="list-group-item"><strong>Prazo:</strong> ${pregao.prazo}</li>
+          <li class="list-group-item"><strong>Início:</strong> ${formatarDataHora(pregao.inicio)}</li>
+          <li class="list-group-item"><strong>Término:</strong> ${formatarDataHora(pregao.fim)}</li>
           <li class="list-group-item"><strong>Requisitos:</strong> ${pregao.requisitos}</li>
         </ul>
 

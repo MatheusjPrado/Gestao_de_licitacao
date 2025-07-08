@@ -62,12 +62,22 @@
 
 <script>
   const pregoes = [
-    { id: "001", descricao: "Compra de Servidores", tipo: "Compra de material", area: "Informática", preco: "R$ 25.000,00", status: "aberto" },
-    { id: "002", descricao: "Manutenção de Prédio", tipo: "Contratação de serviço", area: "Construção Civil", preco: "R$ 12.000,00", status: "aberto" },
-    { id: "003", descricao: "Sistema de Gestão Escolar", tipo: "Compra de software", area: "Informática", preco: "R$ 40.000,00", status: "aberto" },
-    { id: "004", descricao: "Reforma da Biblioteca Central", tipo: "Contratação de serviço", area: "Obras", preco: "R$ 80.000,00", status: "fechado", vencedor: "Construtora Alpha" },
-    { id: "005", descricao: "Aquisição de Veículos Administrativos", tipo: "Compra de material", area: "Transportes", preco: "R$ 150.000,00", status: "cancelado" }
+    { id: "001", descricao: "Compra de Servidores", tipo: "Compra de material", area: "Informática", preco: "R$ 25.000,00", status: "aberto", inicio: "2025-07-05T08:00", fim: "2025-07-05T18:00" },
+    { id: "002", descricao: "Manutenção de Prédio", tipo: "Contratação de serviço", area: "Construção Civil", preco: "R$ 12.000,00", status: "aberto", inicio: "2025-07-06T09:00", fim: "2025-07-06T17:00" },
+    { id: "003", descricao: "Sistema de Gestão Escolar", tipo: "Compra de software", area: "Informática", preco: "R$ 40.000,00", status: "aberto", inicio: "2025-07-07T10:00", fim: "2025-07-07T16:00" },
+    { id: "004", descricao: "Reforma da Biblioteca Central", tipo: "Contratação de serviço", area: "Obras", preco: "R$ 80.000,00", status: "fechado", vencedor: "Construtora Alpha", inicio: "2025-07-08T08:00", fim: "2025-07-08T18:00" },
+    { id: "005", descricao: "Aquisição de Veículos Administrativos", tipo: "Compra de material", area: "Transportes", preco: "R$ 150.000,00", status: "cancelado", inicio: "2025-07-09T09:00", fim: "2025-07-09T17:00" }
   ];
+
+  function formatarDataHora(dataHoraISO) {
+    const data = new Date(dataHoraISO);
+    const dia = String(data.getDate()).padStart(2, '0');
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const ano = data.getFullYear();
+    const hora = String(data.getHours()).padStart(2, '0');
+    const min = String(data.getMinutes()).padStart(2, '0');
+    return `${dia}/${mes}/${ano} às ${hora}:${min}`;
+  }
 
   function criarCard(pregao) {
     const badge = {
@@ -84,6 +94,8 @@
         </div>
         <p><strong>Tipo:</strong> ${pregao.tipo} | <strong>Área:</strong> ${pregao.area}</p>
         <p><strong>Preço Máximo:</strong> ${pregao.preco}</p>
+        <p><strong>Início:</strong> ${formatarDataHora(pregao.inicio)}<br>
+           <strong>Término:</strong> ${formatarDataHora(pregao.fim)}</p>
         <a href="detalhes-pregao.html?id=${pregao.id}" class="btn btn-primary">Ver Detalhes</a>
       </div>
     `;
