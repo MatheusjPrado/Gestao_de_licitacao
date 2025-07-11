@@ -94,16 +94,17 @@
       }
     };
 
+    // NOTA: IDs de exemplo atualizados para 5 dígitos
     const perguntasRespostasIniciais = {
         "001": [
             {
-                id: 1625840000000,
-                fornecedor: "Fornecedor teste LTDA",
+                id: 40000,
+                fornecedor: "Fornecedor Curioso LTDA",
                 pergunta: "A garantia do equipamento pode ser estendida por mais 1 ano?",
                 resposta: "Sim, mediante negociação de valores adicionais no contrato."
             },
             {
-                id: 1625850000000,
+                id: 50000,
                 fornecedor: "Empresa de TI ABC",
                 pergunta: "O suporte técnico está incluso no valor da proposta?",
                 resposta: null
@@ -149,7 +150,6 @@
       `).join('');
     }
 
-    // --- FUNÇÕES CORRIGIDAS PARA USAR LOCALSTORAGE ---
     function carregarEExibirPerguntas(pregaoId) {
         const container = document.getElementById("listaPerguntasRespostas");
         const todosOsDados = JSON.parse(localStorage.getItem('pregoesPerguntas')) || perguntasRespostasIniciais;
@@ -187,7 +187,8 @@
         const todosOsDados = JSON.parse(localStorage.getItem('pregoesPerguntas')) || perguntasRespostasIniciais;
 
         const novaPergunta = {
-            id: new Date().getTime(),
+            // --- ALTERAÇÃO APLICADA AQUI ---
+            id: parseInt(String(new Date().getTime()).slice(-5)), 
             fornecedor: "Meu Fornecedor LTDA",
             pergunta: perguntaTexto,
             resposta: null

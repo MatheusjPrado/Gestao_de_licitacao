@@ -12,6 +12,7 @@
 <body class="bg-light">
   <div class="container mt-4">
     <h2 class="mb-3">Propostas Recebidas</h2>
+    <h4 id="titulo-licitacao" class="text-muted mb-4"></h4>
 
     <div class="input-group mb-3">
       <input type="text" class="form-control" placeholder="Buscar por nome ou CNPJ" id="busca">
@@ -24,7 +25,8 @@
   </div>
 
   <script>
-    const propostas = {
+    // Os dados iniciais que serão a base se o localStorage estiver vazio.
+    const propostasIniciais = {
       "001": [
         { nome: "Empresa A", cnpj: "12.345.678/0001-00", valor: "R$ 18.000,00", status: "aprovado" },
         { nome: "Empresa B", cnpj: "98.765.432/0001-11", valor: "R$ 17.500,00", status: "pendente" },
@@ -45,11 +47,18 @@
     };
 
     const pregoes = {
-      "001": { status: "aberto" },
-      "002": { status: "aberto" },
-      "003": { status: "aberto" },
-      "004": { status: "fechado", vencedor: "Construtora Alpha" }
+      "001": { status: "aberto", descricao: "Compra de Servidores" },
+      "002": { status: "aberto", descricao: "Manutenção de Prédio" },
+      "003": { status: "aberto", descricao: "Sistema de Gestão Escolar" },
+      "004": { status: "fechado", vencedor: "Construtora Alpha", descricao: "Reforma da Biblioteca Central" }
     };
+
+    // --- NOVA FUNÇÃO DE INICIALIZAÇÃO ---
+    function inicializarPropostas() {
+        if (!localStorage.getItem('pregoesPropostas')) {
+            localStorage.setItem('pregoesPropostas', JSON.stringify(propostasIniciais));
+        }
+    }
 
     function registrarLog(pregaoId, evento, detalhes) {
       const agora = new Date();
@@ -75,8 +84,16 @@
     function carregarPropostas() {
       const id = new URLSearchParams(window.location.search).get("id");
       const lista = document.getElementById("listaPropostas");
-      const dados = propostas[id] || [];
-      const statusPregao = pregoes[id] ? pregoes[id].status : "aberto";
+      
+      const tituloContainer = document.getElementById("titulo-licitacao");
+      const dadosPregao = pregoes[id];
+      if (dadosPregao) {
+        tituloContainer.textContent = `Licitação: ${dadosPregao.descricao} (ID: ${id})`;
+      }
+      
+      const todasAsPropostas = JSON.parse(localStorage.getItem('pregoesPropostas')) || {};
+      const dados = todasAsPropostas[id] || [];
+      const statusPregao = dadosPregao ? dadosPregao.status : "aberto";
 
       const existeVencedor = dados.some(p => p.vencedor);
 
@@ -107,9 +124,11 @@
 
     function aprovar(index, id) {
       if (confirm("Deseja aprovar esta proposta?")) {
-        propostas[id][index].status = 'aprovado';
+        const todasAsPropostas = JSON.parse(localStorage.getItem('pregoesPropostas')) || {};
+        todasAsPropostas[id][index].status = 'aprovado';
+        localStorage.setItem('pregoesPropostas', JSON.stringify(todasAsPropostas));
         
-        const propostaAprovada = propostas[id][index];
+        const propostaAprovada = todasAsPropostas[id][index];
         registrarLog(id, "Proposta Aprovada", `Fornecedor: ${propostaAprovada.nome} | Valor: ${propostaAprovada.valor}`);
 
         carregarPropostas();
@@ -118,20 +137,26 @@
 
     function rejeitar(index, id) {
       if (confirm("Tem certeza que deseja rejeitar esta proposta?")) {
-        const propostaRejeitada = propostas[id][index];
+        const todasAsPropostas = JSON.parse(localStorage.getItem('pregoesPropostas')) || {};
+        const propostaRejeitada = todasAsPropostas[id][index];
+        
         registrarLog(id, "Proposta Rejeitada", `Fornecedor: ${propostaRejeitada.nome} | Valor: ${propostaRejeitada.valor}`);
 
-        propostas[id].splice(index, 1);
+        todasAsPropostas[id].splice(index, 1);
+        localStorage.setItem('pregoesPropostas', JSON.stringify(todasAsPropostas));
+
         carregarPropostas();
       }
     }
 
     function elegerVencedor(index, id) {
       if (confirm("Confirmar esta proposta como vencedora? Isso não poderá ser desfeito.")) {
-        propostas[id].forEach(p => delete p.vencedor);
-        propostas[id][index].vencedor = true;
+        const todasAsPropostas = JSON.parse(localStorage.getItem('pregoesPropostas')) || {};
+        todasAsPropostas[id].forEach(p => delete p.vencedor);
+        todasAsPropostas[id][index].vencedor = true;
+        localStorage.setItem('pregoesPropostas', JSON.stringify(todasAsPropostas));
 
-        const propostaVencedora = propostas[id][index];
+        const propostaVencedora = todasAsPropostas[id][index];
         registrarLog(id, "Vencedor Eleito", `Fornecedor: ${propostaVencedora.nome} | Valor: ${propostaVencedora.valor}`);
         registrarLog(id, "Pregão Encerrado", `Declarado o vencedor. O processo de lances está finalizado.`);
         
@@ -144,7 +169,9 @@
       const termo = document.getElementById("busca").value.toLowerCase();
       const id = new URLSearchParams(window.location.search).get("id");
       const lista = document.getElementById("listaPropostas");
-      const dados = propostas[id] || [];
+      
+      const todasAsPropostas = JSON.parse(localStorage.getItem('pregoesPropostas')) || {};
+      const dados = todasAsPropostas[id] || [];
       const statusPregao = pregoes[id] ? pregoes[id].status : "aberto";
 
       const existeVencedor = dados.some(p => p.vencedor);
@@ -176,7 +203,10 @@
       }).join('');
     }
 
-    window.onload = carregarPropostas;
+    window.onload = () => {
+        inicializarPropostas(); // Garante que os dados base existem
+        carregarPropostas();    // Carrega os dados na tela
+    };
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -47,10 +47,9 @@
     }
 
     function preencherDadosDoUsuario() {
-      // Simulação de login: você substituirá isso por dados reais do backend ou sessão
       const usuarioLogado = {
         nome: "Fornecedor XYZ LTDA",
-        cnpj: "12345678000199",
+        cnpj: "12.345.678/0001-99",
         email: "contato@xyz.com.br",
         telefone: "(11) 91234-5678"
       };
@@ -60,7 +59,6 @@
       document.getElementById("email").value = usuarioLogado.email;
       document.getElementById("telefone").value = usuarioLogado.telefone;
 
-      // Deixa os campos somente leitura
       document.getElementById("fornecedor").readOnly = true;
       document.getElementById("cnpj").readOnly = true;
       document.getElementById("email").readOnly = true;
@@ -110,7 +108,8 @@
 
           <div class="mb-3">
             <label class="form-label">Valor da Proposta (R$)</label>
-            <input type="number" class="form-control" required>
+            <input type="text" id="valor" class="form-control" required inputmode="decimal" 
+                   oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');">
           </div>
 
           <div class="mb-3">
@@ -131,12 +130,26 @@
       e.preventDefault();
       
       const idPregao = new URLSearchParams(window.location.search).get("id");
-      const fornecedor = document.getElementById("fornecedor").value;
-      const valor = document.querySelector('input[type="number"]').value;
-
-      registrarLog(idPregao, "Nova Proposta Recebida", `Fornecedor: ${fornecedor} | Valor: R$ ${valor}`);
       
-      alert("Proposta enviada com sucesso! (simulação)");
+      const novaProposta = {
+          nome: document.getElementById("fornecedor").value,
+          cnpj: document.getElementById("cnpj").value,
+          valor: "R$ " + parseFloat(document.getElementById("valor").value).toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+          status: "pendente"
+      };
+
+      const todasAsPropostas = JSON.parse(localStorage.getItem('pregoesPropostas')) || {};
+
+      if (!todasAsPropostas[idPregao]) {
+          todasAsPropostas[idPregao] = [];
+      }
+
+      todasAsPropostas[idPregao].push(novaProposta);
+      localStorage.setItem('pregoesPropostas', JSON.stringify(todasAsPropostas));
+
+      registrarLog(idPregao, "Nova Proposta Recebida", `Fornecedor: ${novaProposta.nome} | Valor: ${novaProposta.valor}`);
+      
+      alert("Proposta enviada com sucesso!");
       window.location.href = `detalhes-pregao.html?id=${idPregao}`;
     });
   </script>
