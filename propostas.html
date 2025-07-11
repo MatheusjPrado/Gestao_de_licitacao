@@ -19,6 +19,8 @@
     </div>
 
     <ul class="list-group" id="listaPropostas"></ul>
+
+    <a href="#" onclick="history.back();" class="btn btn-outline-secondary mt-4">Voltar</a>
   </div>
 
   <script>
@@ -49,6 +51,27 @@
       "004": { status: "fechado", vencedor: "Construtora Alpha" }
     };
 
+    function registrarLog(pregaoId, evento, detalhes) {
+      const agora = new Date();
+      const timestamp = `${agora.toLocaleDateString()} ${agora.toLocaleTimeString()}`;
+      
+      const logEntry = {
+        timestamp: timestamp,
+        evento: evento,
+        detalhes: detalhes
+      };
+
+      const logs = JSON.parse(localStorage.getItem('pregoesLogs')) || {};
+      
+      if (!logs[pregaoId]) {
+        logs[pregaoId] = [];
+      }
+      
+      logs[pregaoId].push(logEntry);
+      
+      localStorage.setItem('pregoesLogs', JSON.stringify(logs));
+    }
+
     function carregarPropostas() {
       const id = new URLSearchParams(window.location.search).get("id");
       const lista = document.getElementById("listaPropostas");
@@ -66,7 +89,7 @@
                 ${p.vencedor ? '<span class="vencedor-badge">Vencedora</span>' : ''}
               </div>
               <div>Valor: ${p.valor}</div>
-              <div>Status: ${p.status === 'aprovado' ? '<span class=\"aprovado\">Aprovado</span>' : 'Pendente'}</div>
+              <div>Status: ${p.status === 'aprovado' ? '<span class="aprovado">Aprovado</span>' : 'Pendente'}</div>
             </div>
             <div>
               ${statusPregao === "aberto" && p.status === 'pendente' ? `
@@ -85,12 +108,19 @@
     function aprovar(index, id) {
       if (confirm("Deseja aprovar esta proposta?")) {
         propostas[id][index].status = 'aprovado';
+        
+        const propostaAprovada = propostas[id][index];
+        registrarLog(id, "Proposta Aprovada", `Fornecedor: ${propostaAprovada.nome} | Valor: ${propostaAprovada.valor}`);
+
         carregarPropostas();
       }
     }
 
     function rejeitar(index, id) {
       if (confirm("Tem certeza que deseja rejeitar esta proposta?")) {
+        const propostaRejeitada = propostas[id][index];
+        registrarLog(id, "Proposta Rejeitada", `Fornecedor: ${propostaRejeitada.nome} | Valor: ${propostaRejeitada.valor}`);
+
         propostas[id].splice(index, 1);
         carregarPropostas();
       }
@@ -100,6 +130,11 @@
       if (confirm("Confirmar esta proposta como vencedora? Isso não poderá ser desfeito.")) {
         propostas[id].forEach(p => delete p.vencedor);
         propostas[id][index].vencedor = true;
+
+        const propostaVencedora = propostas[id][index];
+        registrarLog(id, "Vencedor Eleito", `Fornecedor: ${propostaVencedora.nome} | Valor: ${propostaVencedora.valor}`);
+        registrarLog(id, "Pregão Encerrado", `Declarado o vencedor. O processo de lances está finalizado.`);
+        
         alert("Proposta marcada como vencedora (simulação)");
         carregarPropostas();
       }
@@ -125,7 +160,7 @@
                 ${p.vencedor ? '<span class="vencedor-badge">Vencedora</span>' : ''}
               </div>
               <div>Valor: ${p.valor}</div>
-              <div>Status: ${p.status === 'aprovado' ? '<span class=\"aprovado\">Aprovado</span>' : 'Pendente'}</div>
+              <div>Status: ${p.status === 'aprovado' ? '<span class="aprovado">Aprovado</span>' : 'Pendente'}</div>
             </div>
             <div>
               ${statusPregao === "aberto" && p.status === 'pendente' ? `

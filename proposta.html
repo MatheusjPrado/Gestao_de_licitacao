@@ -11,6 +11,27 @@
       "003": { descricao: "Sistema de Gestão Escolar" }
     };
 
+    function registrarLog(pregaoId, evento, detalhes) {
+      const agora = new Date();
+      const timestamp = `${agora.toLocaleDateString()} ${agora.toLocaleTimeString()}`;
+      
+      const logEntry = {
+        timestamp: timestamp,
+        evento: evento,
+        detalhes: detalhes
+      };
+
+      const logs = JSON.parse(localStorage.getItem('pregoesLogs')) || {};
+      
+      if (!logs[pregaoId]) {
+        logs[pregaoId] = [];
+      }
+      
+      logs[pregaoId].push(logEntry);
+      
+      localStorage.setItem('pregoesLogs', JSON.stringify(logs));
+    }
+
     function carregarPregao() {
       const params = new URLSearchParams(window.location.search);
       const id = params.get("id");
@@ -108,8 +129,15 @@
   <script>
     document.getElementById("formProposta").addEventListener("submit", function(e) {
       e.preventDefault();
+      
+      const idPregao = new URLSearchParams(window.location.search).get("id");
+      const fornecedor = document.getElementById("fornecedor").value;
+      const valor = document.querySelector('input[type="number"]').value;
+
+      registrarLog(idPregao, "Nova Proposta Recebida", `Fornecedor: ${fornecedor} | Valor: R$ ${valor}`);
+      
       alert("Proposta enviada com sucesso! (simulação)");
-      this.reset();
+      window.location.href = `detalhes-pregao.html?id=${idPregao}`;
     });
   </script>
 
